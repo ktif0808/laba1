@@ -1,0 +1,107 @@
+{% extends 'partials/base.html' %}
+
+
+{% block content %}
+
+    <div class="row mt-5">
+        <div class="col-md-4 mt-2">
+            <h4>Explanations</h4>
+            <hr>
+            <h5>To send "GET" request use this example</h5>
+            <h5>Just choose your voltage in a way (volt-XXX) between 0 and 999 </h5>
+            <form action="" method="GET">
+                <!--<p>Please enter your username</p> -->
+                <input type="text" style="width: 350px;" value ="http://ktif0808.pythonanywhere.com/volt-200">
+                <!--<button type="submit">Submit</button>-->
+            </form>
+
+        </div>
+
+        <div class="col-md-8">
+            <canvas id="myChart" width="400" height="250"></canvas>
+                <script>
+
+                var ctx = document.getElementById('myChart').getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: [{% for product in products %}  '{{ product.category }}',  {% endfor %}],
+                        datasets: [{
+                            label: '# voltage ordered by user',
+                            data: [{% for product in products %}  {{ product.num_of_products }},  {% endfor %}],
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.8)',
+                                'rgba(54, 162, 235, 0.8)',
+                                'rgba(255, 206, 86, 0.8)',
+                                'rgba(75, 192, 192, 0.8)',
+                                'rgba(153, 102, 255, 0.8)',
+                                'rgba(255, 159, 64, 0.8)',
+                                'rgba(240, 120, 50, 0.8)',
+                            ],
+                            borderColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(153, 102, 255, 1)',
+                                'rgba(255, 159, 64, 1)',
+                                'rgba(240, 120, 50, 1)',
+
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        legend: {
+                            display: false
+                         },
+                        scales: {
+                           yAxes: [{
+        ticks: {
+          beginAtZero: true,
+        }
+      }]
+     }
+  }
+ });
+    $(document).ready(function(){
+      setInterval(function(){
+        $.ajax({
+            type: 'GET',
+            url : "{%  url 'getUsers' %}",
+            success: function(response){
+                //console.log(response);
+
+            //$("#display").empty();
+            console.log(myChart.data.datasets[0].data.length)
+            console.log(response.users.length)
+
+            lenChart = myChart.data.datasets[0].data.length
+            lenAjax = response.users.length
+            if (lenChart!=lenAjax){
+                for (var i=lenChart; i<lenAjax; i+=1){
+                    console.log(response.users[i].category, response.users[i].num_of_products);
+                    myChart.data.labels.push(response.users[i].category);
+                    //myChart.data.labels.push(response.users[i].category+"| 29.11.2022");
+                    myChart.data.datasets[0].data.push(response.users[i].num_of_products);
+                }
+                myChart.update();
+            }
+            },
+            error: function(response){
+              alert("No DATA FOUND");
+            }
+        });
+
+      }, 3000);
+
+    });
+
+                </script>
+        </div>
+    </div>
+
+
+
+{% endblock %}
