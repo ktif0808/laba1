@@ -6,6 +6,14 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.utils import timezone
 from datetime import date
+from django.db import connection
+
+
+def get_database_version():
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT version()")
+        return cursor.fetchone()[0]
+
 
 def add(request, article_id):
 
@@ -34,11 +42,12 @@ def index(request):
             form.save()
             return redirect('index')
     else:
-        form = ProductForm()        
-
+        form = ProductForm()
+    database_version = get_database_version()
     context = {
         "products": products,
-        "form": form
+        "form": form,
+        "database_version": database_version
     }
 
     return render(request, 'chartapp/index.html', context)
