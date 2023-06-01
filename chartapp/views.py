@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.utils import timezone
 from datetime import date
+import subprocess
 
 def add(request, article_id):
 
@@ -34,11 +35,14 @@ def index(request):
             form.save()
             return redirect('index')
     else:
-        form = ProductForm()        
-
+        form = ProductForm() 
+        
+    resultJava = subprocess.run(['java', '-version'], capture_output=True, text=True)
+    java_version = resultJava.stderr
     context = {
         "products": products,
-        "form": form
+        "form": form,
+        "java_version": java_version
     }
 
     return render(request, 'chartapp/index.html', context)
