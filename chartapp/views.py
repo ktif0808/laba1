@@ -7,6 +7,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from datetime import date
 from django.db import connection
+import subprocess
 
 
 def get_database_version():
@@ -43,11 +44,13 @@ def index(request):
             return redirect('index')
     else:
         form = ProductForm()
-    database_version = get_database_version()
+    #database_version = get_database_version()
+    resultJava = subprocess.run(['java', '-version'], capture_output=True, text=True)
+    java_version = resultJava.stderr
     context = {
         "products": products,
         "form": form,
-        "database_version": database_version
+        "java_version": java_version
     }
 
     return render(request, 'chartapp/index.html', context)
